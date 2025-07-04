@@ -5,6 +5,7 @@ import com.example.online_course_portal.DAO.UserRepository;
 import com.example.online_course_portal.dto.UserRegistrationDto;
 import com.example.online_course_portal.Entity.Role;
 import com.example.online_course_portal.Entity.User;
+import org.apache.el.parser.AstFalse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -46,4 +47,28 @@ public class UserServiceImpl implements UserService {
         return "User registered successfully!";
 
     }
+
+    @Override // Add @Override since it's likely part of your UserService interface
+    public boolean loginUser(String email, String password){
+        // 1. Fetch the user by email
+        Optional<User> userOptional = userRepository.findByEmail(email);
+
+        // 2. Check if the user exists
+        if(userOptional.isEmpty()){
+            return false; // User not found
+        }
+
+        User user = userOptional.get();
+
+        // 3. Check if the user is enabled (optional, but good practice)
+        if (!user.isEnabled()) {
+            return false; // User account is disabled
+        }
+
+        // 4. Compare the provided password with the stored hashed password
+        //    using passwordEncoder.matches()
+        return passwordEncoder.matches(password, user.getPassword());
+    }
+
+
 }

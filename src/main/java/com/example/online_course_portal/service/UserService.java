@@ -4,4 +4,6 @@ import com.example.online_course_portal.dto.UserRegistrationDto;
 
 public interface UserService {
     String registerUser(UserRegistrationDto userDto);
+
+    boolean loginUser(String email, String password);
 }

@@ -29,6 +29,10 @@ public class User {
     )
     private Set<Role> roles=new HashSet<>();
 
+    public User() { // Add this no-argument constructor
+        // Default constructor needed by JPA/Hibernate
+    }
+
     public User(String name, String email, String password, boolean enabled, Set<Role> roles) {
         this.name = name;
         this.email = email;
