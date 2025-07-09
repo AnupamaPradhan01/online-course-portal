@@ -10,7 +10,7 @@ import java.util.Set;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     private String name;
 
@@ -41,11 +41,11 @@ public class User {
         this.roles = roles;
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -88,4 +88,26 @@ public class User {
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
+
+    //Helper method to add a role(useful during user creation/role assignment)
+    public void addRole(Role role){
+        this.roles.add(role);
+    }
+    //<------------------------ADD THIS CRUCIAL METHOD----------------->
+    /**
+     * Checks if the user has a specific role by its name.
+     * This methods assumes role names are stored exactly as strings
+     * (e.g. "ROLE_TEACHER","ROLE_STUDENT")
+     *
+     * @param roleName THe extract string name of the role to check for.
+     * @return true if the user has the specified role, false otherwise
+     *
+     */
+    public boolean hasRole(String roleName){
+        if(this.roles==null || this.roles.isEmpty()){
+            return false;
+        }
+        return this.roles.stream().anyMatch(role->role.getName().equals(roleName));
+    }
+
 }
