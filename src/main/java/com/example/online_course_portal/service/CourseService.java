@@ -7,9 +7,11 @@ import com.example.online_course_portal.dto.CourseCreationDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.example.online_course_portal.Entity.User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -46,4 +48,30 @@ public class CourseService {
         return courseRepository.save(course);
     }
     // other course related methods(get,update,delete)
+    /**
+     * Retrieves a course by its ID.
+     * @param courseID the ID of the course to retrieve.
+     * @return An optional containing the Course if found, or empty if not.
+     */
+    public Optional<Course> getCourseID(Long courseID){
+        return courseRepository.findById(courseID);
+    }
+    /**
+     * Retrieves all course
+     * @return A list of all Courses.
+     */
+    public List<Course> getAllCourses(){
+        return courseRepository.findAll();
+    }
+    /**
+     * Updates an existing course
+     * @param courseID the ID of the course to update.
+     * @param courseUpdateDTO the DTO containing the updated course details.
+     * @return The updated CourseResponseDTo.
+     * @throws IllegalArgumentException if instructor not found or not a teacher
+     * @throws ResourseNotFoundException (create custom exception) if course not found
+     */
+//    @Transactional//Ensures the entire method runs in a single transcation
+//    public CourseResponseDTO
+
 }
