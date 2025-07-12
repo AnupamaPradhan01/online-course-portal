@@ -4,12 +4,15 @@ import com.example.online_course_portal.DAO.CourseRepository;
 import com.example.online_course_portal.DAO.UserRepository;
 import com.example.online_course_portal.Entity.Course;
 import com.example.online_course_portal.dto.CourseCreationDTO;
+import com.example.online_course_portal.dto.CourseUpdateDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.example.online_course_portal.Entity.User;
+import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -65,13 +68,34 @@ public class CourseService {
     }
     /**
      * Updates an existing course
-     * @param courseID the ID of the course to update.
+     * @param courseId the ID of the course to update.
      * @param courseUpdateDTO the DTO containing the updated course details.
      * @return The updated CourseResponseDTo.
-     * @throws IllegalArgumentException if instructor not found or not a teacher
-     * @throws ResourseNotFoundException (create custom exception) if course not found
+     * @throws IllegalArgumentException if course is not found.
+     *
      */
-//    @Transactional//Ensures the entire method runs in a single transcation
-//    public CourseResponseDTO
+      @Transactional
+      public Course updateCourse(Long courseId, CourseUpdateDTO courseUpdateDTO){
+          Optional<Course> existingCourseOptional=courseRepository.findById(courseId);
+
+          if(existingCourseOptional.isEmpty()){
+              throw new IllegalArgumentException("Course not found with ID: "+ courseId);
+          }
+
+          Course existingCourse=existingCourseOptional.get();
+
+          //Update fields if provided in the DTO
+          if(courseUpdateDTO.getTitle()!=null){
+              existingCourse.setTitle(courseUpdateDTO.getTitle());
+          }
+          if(courseUpdateDTO.getDescription()!=null){
+              existingCourse.setDescription(courseUpdateDTO.getDescription());
+          }
+          if(courseUpdateDTO.getPrice()!=null){
+              existingCourse.setPrice(courseUpdateDTO.getPrice());
+          }
+          existingCourse.setUpdatedAt(LocalDateTime.now());
+          return courseRepository.save(existingCourse);
+      }
 
 }

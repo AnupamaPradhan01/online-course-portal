@@ -30,11 +30,9 @@ public class Course {
     private User instructor;//The actual User object representing the instructor
 
     @Column(name = "created_at",updatable = false)
-    @JsonIgnore
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
-    @JsonIgnore
     private LocalDateTime updatedAt;
 
     // No-arg Constructor required by JPA

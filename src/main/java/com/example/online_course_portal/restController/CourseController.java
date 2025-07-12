@@ -2,6 +2,7 @@ package com.example.online_course_portal.restController;
 
 import com.example.online_course_portal.Entity.Course;
 import com.example.online_course_portal.dto.CourseCreationDTO;
+import com.example.online_course_portal.dto.CourseUpdateDTO;
 import com.example.online_course_portal.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -54,5 +55,21 @@ public class CourseController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);//204 No content if list is empty
         }
         return new ResponseEntity<>(courses,HttpStatus.OK);
+    }
+
+    // Add the PUT endpoint for updating a course
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_TEACHER')")//only admins and teacher can update courses
+    public ResponseEntity<Course> updateCourse(@PathVariable Long id, @RequestBody CourseUpdateDTO courseUpdateDTO){
+        try{
+            Course updatedCourse=courseService.updateCourse(id,courseUpdateDTO);
+            return new ResponseEntity<>(updatedCourse,HttpStatus.OK);
+        }
+        catch (IllegalArgumentException e){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);//course not found
+        }
+        catch (Exception e){
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);//other unexpected errors
+        }
     }
 }
