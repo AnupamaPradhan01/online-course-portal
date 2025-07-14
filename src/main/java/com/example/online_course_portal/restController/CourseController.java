@@ -7,6 +7,7 @@ import com.example.online_course_portal.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -70,6 +71,32 @@ public class CourseController {
         }
         catch (Exception e){
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);//other unexpected errors
+        }
+    }
+    /**
+     * Deletes a course by itd ID.
+     * This version uses local exception handling (try-catch) and checks existence directly.
+     * @param id The ID of the course to delete.
+     * @return ResponseEntity with HttpStatus.NO_CONTENT(204) on success, or 404/403/500 error.
+     */
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    public ResponseEntity<Void> deleteCourse(@PathVariable Long id){
+        try{
+            boolean deleted= courseService.deleteCourse(id);
+            if(deleted){
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT); // 204 No content for successful deletion
+            }
+            else{
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);// 404 Not found if course didn't exist
+            }
+        }
+        catch(AccessDeniedException e){
+            //Spring security AccessDeniedException for @PreAuthorize
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);//403 forbidden
+        } catch (Exception e) {
+            //catch-all for any other unexpected error
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);//500 Internal Server error
         }
     }
 }

@@ -97,5 +97,18 @@ public class CourseService {
           existingCourse.setUpdatedAt(LocalDateTime.now());
           return courseRepository.save(existingCourse);
       }
+    /**
+     * Deletes a course by its ID
+     * Returns true if the course was found and deleted,false otherwise
+     * No specific exception is thrown for 'not found'.
+     */
+    @Transactional
+    public boolean deleteCourse(Long courseId){
+        if(courseRepository.existsById(courseId)){
+            courseRepository.deleteById(courseId);
+            return true;//Indicates successful deletion
+        }
+        return false; // Indicates course not found
+    }
 
 }
