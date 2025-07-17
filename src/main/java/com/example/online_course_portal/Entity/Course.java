@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name="courses")
@@ -35,12 +37,15 @@ public class Course {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    //One-to-Many relationship with Modules
+    //A course can have many modules
+    @OneToMany(mappedBy = "course",cascade=CascadeType.ALL,orphanRemoval=true,fetch = FetchType.LAZY)
+    private List<Module> modules=new ArrayList<>();//Initialize to prevent NullPointerException
+
     // No-arg Constructor required by JPA
     public Course(){}
 
     //Constructor for creating a new course
-
-
     public Course(String title, String description, BigDecimal price, User instructor, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.title = title;
         this.description = description;
@@ -50,7 +55,8 @@ public class Course {
         this.updatedAt = updatedAt;
     }
 
-    //Getters and Setters
+
+//Getters and Setters
 
     public Long getId() {
         return id;
@@ -107,6 +113,14 @@ public class Course {
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
+
+    public List<Module> getModules() {
+        return modules;
+    }
+
+    public void setModules(List<Module> modules) {
+        this.modules = modules;
+    }
     //TO string
 
     @Override
@@ -119,6 +133,7 @@ public class Course {
                 ", instructor=" + instructor +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
+                ", modules=" + modules +
                 '}';
     }
 }
