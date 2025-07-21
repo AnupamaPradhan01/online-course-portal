@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "modules")
@@ -35,8 +36,8 @@ public class Module {
     private LocalDateTime updatedAt;
 
     //Optional: One-to-Many relationship with lessons(covered later)
-    //@OneToMany(mappedBy="module",cascade=CascadeType.ALL,orphanRemoval=true)
-    //private List<Lesson> lessons;
+    @OneToMany(mappedBy="module",cascade=CascadeType.ALL,orphanRemoval=true)
+    private List<Lesson> lessons;
 
     //No-arg Constructor required by JPA
     public Module(){}
@@ -108,7 +109,14 @@ public class Module {
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
-    //To String
+    //Added getters and setters for one to many relationship with lesson
+    public List<Lesson> getLessons() {
+        return lessons;
+    }
+
+    public void setLessons(List<Lesson> lessons) {
+        this.lessons = lessons;
+    }
 
     @Override
     public String toString() {
@@ -120,6 +128,7 @@ public class Module {
                 ", course=" + course +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
+                ", lessons=" + lessons +
                 '}';
     }
 }
