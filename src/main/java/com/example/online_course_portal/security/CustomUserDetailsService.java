@@ -22,16 +22,18 @@ public class CustomUserDetailsService implements  UserDetailsService{
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
         // Convert your application's User entity to Spring Security's UserDetails object
-        return new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
-                user.getPassword(),
-                user.isEnabled(), // Assuming you have an isEnabled field
-                true, // accountNonExpired
-                true, // credentialsNonExpired
-                true, // accountNonLocked
-                user.getRoles().stream()
-                        .map(role -> new SimpleGrantedAuthority(role.getName()))
-                        .collect(Collectors.toSet())
-        );
+//        return new org.springframework.security.core.userdetails.User(
+//                user.getEmail(),
+//                user.getPassword(),
+//                user.isEnabled(), // Assuming you have an isEnabled field
+//                true, // accountNonExpired
+//                true, // credentialsNonExpired
+//                true, // accountNonLocked
+//                user.getRoles().stream()
+//                        .map(role -> new SimpleGrantedAuthority(role.getName()))
+//                        .collect(Collectors.toSet())
+//        );
+        //Now we can directly return User entity, because it implements UserDetails
+        return user;
     }
 }

@@ -1,13 +1,19 @@
 package com.example.online_course_portal.Entity;
 
 import jakarta.persistence.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails; // <-- IMPORTANT: Add this import
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors; // <-- Add this import for stream.Collectors
 
 @Entity
 @Table(name="users")
-public class User {
+public class User implements UserDetails { // <-- Implement UserDetails
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -15,11 +21,11 @@ public class User {
     private String name;
 
     @Column(unique = true,nullable = false)
-    private String email;
+    private String email; // This will serve as the username for Spring Security
 
     private String password;
 
-    private boolean enabled=true;
+    private boolean enabled = true; // Default to true
 
     @ManyToMany(fetch=FetchType.EAGER)
     @JoinTable(
@@ -27,9 +33,9 @@ public class User {
             joinColumns = @JoinColumn(name="user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    private Set<Role> roles=new HashSet<>();
+    private Set<Role> roles = new HashSet<>();
 
-    public User() { // Add this no-argument constructor
+    public User() {
         // Default constructor needed by JPA/Hibernate
     }
 
@@ -41,6 +47,7 @@ public class User {
         this.roles = roles;
     }
 
+    // --- Getters and Setters for your entity fields (keep as they are) ---
     public Long getId() {
         return id;
     }
@@ -57,52 +64,26 @@ public class User {
         this.name = name;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
     }
 
     public void setPassword(String password) {
         this.password = password;
     }
 
-    public boolean isEnabled() {
-        return enabled;
-    }
-
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
-    }
-
-    public Set<Role> getRoles() {
-        return roles;
     }
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
 
-    //Helper method to add a role(useful during user creation/role assignment)
     public void addRole(Role role){
         this.roles.add(role);
     }
-    //<------------------------ADD THIS CRUCIAL METHOD----------------->
-    /**
-     * Checks if the user has a specific role by its name.
-     * This methods assumes role names are stored exactly as strings
-     * (e.g. "ROLE_TEACHER","ROLE_STUDENT")
-     *
-     * @param roleName THe extract string name of the role to check for.
-     * @return true if the user has the specified role, false otherwise
-     *
-     */
+
     public boolean hasRole(String roleName){
         if(this.roles==null || this.roles.isEmpty()){
             return false;
@@ -110,4 +91,44 @@ public class User {
         return this.roles.stream().anyMatch(role->role.getName().equals(roleName));
     }
 
+
+    // --- Implementations of UserDetails interface methods ---
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        // Map your 'roles' Set to Spring Security's GrantedAuthority objects
+        return this.roles.stream()
+                .map(role -> new SimpleGrantedAuthority(role.getName()))
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    public String getPassword() {
+        return this.password; // Return the password stored in your entity
+    }
+
+    @Override
+    public String getUsername() {
+        return this.email; // Use email as the username for Spring Security
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true; // For simplicity, assume accounts don't expire. Implement your logic if needed.
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true; // For simplicity, assume accounts are not locked. Implement your logic if needed.
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true; // For simplicity, assume credentials don't expire. Implement your logic if needed.
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return this.enabled; // Return the 'enabled' status from your entity
+    }
 }
