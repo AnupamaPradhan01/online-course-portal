@@ -1,30 +1,42 @@
 package com.example.online_course_portal.service;
 
 import com.example.online_course_portal.DAO.CourseRepository;
+import com.example.online_course_portal.DAO.LessonRepository;
+import com.example.online_course_portal.DAO.ModuleRepository;
 import com.example.online_course_portal.DAO.UserRepository;
 import com.example.online_course_portal.Entity.Course;
+import com.example.online_course_portal.Entity.Lesson;
+import com.example.online_course_portal.Entity.Module;
 import com.example.online_course_portal.dto.CourseCreationDTO;
 import com.example.online_course_portal.dto.CourseUpdateDTO;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.example.online_course_portal.Entity.User;
-import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CourseService {
-    @Autowired
-    private CourseRepository courseRepository;
+    private final CourseRepository courseRepository;
+    private final UserRepository userRepository;
+    private final ModuleRepository moduleRepository;
+    private final LessonRepository lessonRepository;
 
     @Autowired
-    private UserRepository userRepository;
-
+    public CourseService(CourseRepository courseRepository,UserRepository userRepository,ModuleRepository moduleRepository,LessonRepository lessonRepository){
+        this.courseRepository=courseRepository;
+        this.userRepository=userRepository;
+        this.moduleRepository=moduleRepository;
+        this.lessonRepository=lessonRepository;
+    }
     public Course createCourse(CourseCreationDTO courseDto){
         Optional<User> instructorOptional=userRepository.findById(courseDto.getInstructorId());
 
@@ -109,6 +121,44 @@ public class CourseService {
             return true;//Indicates successful deletion
         }
         return false; // Indicates course not found
+    }
+    // ----NEW METHODS FOR PROGRESS TRACKING-----
+    /**
+     * Retrieves all lessons belonging to a specific course.
+     * This method is needed by ProgressService to calculate course Progress.
+     * @param courseId The ID of the course.
+     * @return A list of all lessons in the course.
+     * @throws jakarta.persistence.EntityNotFoundException if the course does not exist.
+     */
+    public List<Lesson> getAllLessonsInCourse(Long courseId){
+        Course course=courseRepository.findById(courseId)
+                .orElseThrow(()->new EntityNotFoundException("Course not found with ID: " + courseId));
+
+        //Get all modules for the course
+        //Note: For this ti work, your Course entity must have a @OneToMany mapping to modules.
+        //E.g @OneToMany(mappedBy="Course",cascade=CascadeType.All)
+        //private List<Module> modules;
+        List<Module> modules=moduleRepository.findByCourseId(courseId);
+        if(modules.isEmpty()){
+            return Collections.emptyList();//No modules,no lessons
+        }
+        //Collect all lessons from all modules
+        return modules.stream()
+                .flatMap(module->lessonRepository.findByModuleId(module.getId()).stream())
+                .collect(Collectors.toList());
+
+    }
+    /**
+     * retrieves the title of a specific course.
+     * This method is needed by ProgressService to build the CourseProgressDTO.
+     * @param courseId The ID of the course.
+     * @return THe title of the course.
+     * @throws EntityNotFoundException if the course does not exist.
+     */
+    public String getCourseTitle(Long courseId){
+        Course course=courseRepository.findById(courseId)
+                .orElseThrow(()->new EntityNotFoundException("Course not found with ID: " + courseId));
+        return course.getTitle();
     }
 
 }
